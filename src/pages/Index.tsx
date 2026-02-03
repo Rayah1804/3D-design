@@ -51,7 +51,7 @@ const Index = () => {
         {/* Parallax Text Banner */}
         <div className="relative py-10 overflow-hidden">
           <ParallaxText direction="left" speed={0.5}>
-            PREMIUM AUDIO • DESIGN ICONIQUE •
+            PREMIUM AUDIO • DESIGN  •
           </ParallaxText>
         </div>
 
