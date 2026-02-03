@@ -1,9 +1,10 @@
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Float, Environment, MeshTransmissionMaterial, RoundedBox } from "@react-three/drei";
 import * as THREE from "three";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+// Using in-scene emissive/glow meshes instead of postprocessing to avoid extra peer deps
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -53,6 +54,17 @@ const EarCup = ({ position, rotation }: { position: [number, number, number]; ro
           roughness={0.1}
         />
       </mesh>
+          {/* Soft glow ring - slightly larger, additive blending for bloom-like effect */}
+          <mesh position={[0, -0.1, 0]}>
+            <torusGeometry args={[0.58, 0.06, 16, 64]} />
+            <meshBasicMaterial
+              color="#ff6b00"
+              transparent={true}
+              opacity={0.18}
+              blending={THREE.AdditiveBlending}
+              depthWrite={false}
+            />
+          </mesh>
       
       {/* Logo plate */}
       <mesh position={[0, -0.13, 0]} rotation={[Math.PI / 2, 0, 0]}>
@@ -113,6 +125,11 @@ const Headband = () => {
           metalness={0.9}
           roughness={0.1}
         />
+      </mesh>
+      {/* Glow for accent stripe */}
+      <mesh position={[0, 0.95, 0.1]}>
+        <boxGeometry args={[0.45, 0.03, 0.02]} />
+        <meshBasicMaterial color="#ff6b00" transparent opacity={0.12} blending={THREE.AdditiveBlending} depthWrite={false} />
       </mesh>
     </group>
   );
@@ -268,6 +285,8 @@ const DynamicLights = ({ scrollProgress }: { scrollProgress: React.MutableRefObj
   );
 };
 
+
+
 interface Scene3DProps {
   scrollProgress: React.MutableRefObject<number>;
 }
@@ -289,7 +308,7 @@ const Scene3D = ({ scrollProgress }: Scene3DProps) => {
           <HeadphonesModel scrollProgress={scrollProgress} />
         </Float>
         
-        <Environment preset="night" />
+  <Environment preset="night" />
       </Canvas>
     </div>
   );
