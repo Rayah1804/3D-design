@@ -44,15 +44,15 @@ const Index = () => {
         {/* Features Section */}
         <ScrollSection id="features" variant="primary">
           <span className="inline-block px-4 py-2 rounded-full border border-primary/30 text-primary text-sm font-medium mb-8">
-            Technologie Avancée
+            Audio Immersif
           </span>
           <h2 className="text-4xl md:text-6xl font-bold mb-6">
-            <span className="text-foreground">Performance </span>
-            <span className="gradient-text">Exceptionnelle</span>
+            <span className="text-foreground">Son </span>
+            <span className="gradient-text">Exceptionnel</span>
           </h2>
           <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto">
-            Conçu avec les matériaux les plus innovants. Chaque détail est pensé 
-            pour offrir une expérience utilisateur inégalée.
+            Drivers 40mm personnalisés avec réduction de bruit active. 
+            Plongez dans un univers sonore d'une clarté cristalline.
           </p>
         </ScrollSection>
 
