@@ -11,7 +11,6 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
   },
-  // Removed lovable componentTagger integration (project-local instrumentation)
   plugins: [react()].filter(Boolean),
   resolve: {
     alias: {

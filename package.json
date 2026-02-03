@@ -3,6 +3,11 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "author": "Hasina",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Rayah1804/WEB-SITE-STYLE-3D.git"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",

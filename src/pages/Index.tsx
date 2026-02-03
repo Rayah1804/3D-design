@@ -162,10 +162,10 @@ const Index = () => {
                 <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
                   <span className="text-primary-foreground font-bold text-sm">🎧</span>
                 </div>
-                <span className="font-semibold text-foreground tracking-tight">AUDIO PRO</span>
+                <span className="font-semibold text-foreground tracking-tight">HASINA</span>
               </div>
               <p className="text-muted-foreground text-sm">
-                © 2024 Audio Pro. Tous droits réservés.
+                © 2026 Hasina. Tous droits réservés.
               </p>
               <div className="flex gap-6">
                 <a href="#" className="text-muted-foreground hover:text-foreground transition-colors text-sm">
