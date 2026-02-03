@@ -1,6 +1,6 @@
-import { useRef, useMemo, useEffect } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Float, Environment, MeshTransmissionMaterial, useGLTF } from "@react-three/drei";
+import { useRef, useMemo } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { Float, Environment, MeshTransmissionMaterial, RoundedBox } from "@react-three/drei";
 import * as THREE from "three";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -8,34 +8,160 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 
 // =====================================================
-// 3D MODEL CONFIGURATION
+// CASQUE AUDIO 3D - Premium Headphones Model
 // =====================================================
-// To change the 3D model:
-// 1. Add your .glb file to the public folder (e.g., public/models/your-model.glb)
-// 2. Update the MODEL_PATH constant below
-// 3. The model will automatically be animated with scroll triggers
+// Ce modèle est créé avec des primitives Three.js
+// Pour utiliser un vrai fichier .glb:
+// 1. Ajoutez votre fichier dans public/models/headphones.glb
+// 2. Importez useGLTF de @react-three/drei
+// 3. Chargez: const { scene } = useGLTF('/models/headphones.glb')
+// 4. Utilisez <primitive object={scene} /> dans le composant
 // =====================================================
 
-// Placeholder geometric object since we don't have a GLB file
-const PlaceholderModel = ({ scrollProgress }: { scrollProgress: React.MutableRefObject<number> }) => {
-  const groupRef = useRef<THREE.Group>(null);
-  const partsRef = useRef<THREE.Mesh[]>([]);
+// Ear Cup Component
+const EarCup = ({ position, rotation }: { position: [number, number, number]; rotation?: [number, number, number] }) => {
+  return (
+    <group position={position} rotation={rotation}>
+      {/* Outer shell */}
+      <mesh>
+        <cylinderGeometry args={[0.55, 0.55, 0.25, 32]} />
+        <meshStandardMaterial
+          color="#1a1a1a"
+          metalness={0.9}
+          roughness={0.2}
+        />
+      </mesh>
+      
+      {/* Inner cushion */}
+      <mesh position={[0, 0.08, 0]}>
+        <cylinderGeometry args={[0.48, 0.48, 0.12, 32]} />
+        <meshStandardMaterial
+          color="#2a2a2a"
+          metalness={0.3}
+          roughness={0.8}
+        />
+      </mesh>
+      
+      {/* Accent ring */}
+      <mesh position={[0, -0.1, 0]}>
+        <torusGeometry args={[0.52, 0.03, 16, 32]} />
+        <meshStandardMaterial
+          color="#ff6b00"
+          emissive="#ff3300"
+          emissiveIntensity={0.8}
+          metalness={0.9}
+          roughness={0.1}
+        />
+      </mesh>
+      
+      {/* Logo plate */}
+      <mesh position={[0, -0.13, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[0.2, 32]} />
+        <meshStandardMaterial
+          color="#0a0a0a"
+          metalness={1}
+          roughness={0.1}
+        />
+      </mesh>
+    </group>
+  );
+};
 
-  // Create multiple parts for explosion effect
-  const parts = useMemo(() => {
-    const geometries = [
-      { geo: new THREE.TorusKnotGeometry(0.8, 0.25, 128, 32), position: [0, 0, 0] as [number, number, number] },
-      { geo: new THREE.OctahedronGeometry(0.3), position: [1.5, 0.5, 0] as [number, number, number] },
-      { geo: new THREE.OctahedronGeometry(0.25), position: [-1.5, -0.3, 0.5] as [number, number, number] },
-      { geo: new THREE.TetrahedronGeometry(0.2), position: [0.8, -1, 0.3] as [number, number, number] },
-      { geo: new THREE.TetrahedronGeometry(0.18), position: [-0.7, 1.2, -0.4] as [number, number, number] },
-      { geo: new THREE.IcosahedronGeometry(0.22), position: [1.2, -0.8, -0.5] as [number, number, number] },
-    ];
-    return geometries;
+// Headband Component
+const Headband = () => {
+  const curve = useMemo(() => {
+    return new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-1.1, 0, 0),
+      new THREE.Vector3(-0.8, 0.6, 0),
+      new THREE.Vector3(-0.3, 0.9, 0),
+      new THREE.Vector3(0, 0.95, 0),
+      new THREE.Vector3(0.3, 0.9, 0),
+      new THREE.Vector3(0.8, 0.6, 0),
+      new THREE.Vector3(1.1, 0, 0),
+    ]);
   }, []);
 
-  // Store original positions for explosion animation
-  const originalPositions = useMemo(() => parts.map(p => p.position), [parts]);
+  return (
+    <group>
+      {/* Main headband */}
+      <mesh>
+        <tubeGeometry args={[curve, 64, 0.08, 16, false]} />
+        <meshStandardMaterial
+          color="#1a1a1a"
+          metalness={0.8}
+          roughness={0.3}
+        />
+      </mesh>
+      
+      {/* Inner padding */}
+      <mesh>
+        <tubeGeometry args={[curve, 64, 0.06, 16, false]} />
+        <meshStandardMaterial
+          color="#2d2d2d"
+          metalness={0.2}
+          roughness={0.9}
+        />
+      </mesh>
+      
+      {/* Accent stripe */}
+      <mesh position={[0, 0.95, 0.08]}>
+        <boxGeometry args={[0.4, 0.02, 0.02]} />
+        <meshStandardMaterial
+          color="#ff6b00"
+          emissive="#ff3300"
+          emissiveIntensity={1}
+          metalness={0.9}
+          roughness={0.1}
+        />
+      </mesh>
+    </group>
+  );
+};
+
+// Arm/Slider Component
+const SliderArm = ({ side }: { side: "left" | "right" }) => {
+  const x = side === "left" ? -1 : 1;
+  
+  return (
+    <group position={[x * 0.95, 0.15, 0]}>
+      {/* Vertical arm */}
+      <mesh>
+        <boxGeometry args={[0.08, 0.6, 0.06]} />
+        <meshStandardMaterial
+          color="#252525"
+          metalness={0.9}
+          roughness={0.2}
+        />
+      </mesh>
+      
+      {/* Pivot joint */}
+      <mesh position={[0, 0.35, 0]}>
+        <sphereGeometry args={[0.06, 16, 16]} />
+        <meshStandardMaterial
+          color="#1a1a1a"
+          metalness={0.9}
+          roughness={0.2}
+        />
+      </mesh>
+      
+      {/* Connection to cup */}
+      <mesh position={[x * 0.08, -0.25, 0]} rotation={[0, 0, x * 0.3]}>
+        <boxGeometry args={[0.12, 0.15, 0.05]} />
+        <meshStandardMaterial
+          color="#1f1f1f"
+          metalness={0.8}
+          roughness={0.3}
+        />
+      </mesh>
+    </group>
+  );
+};
+
+// Main Headphones Model
+const HeadphonesModel = ({ scrollProgress }: { scrollProgress: React.MutableRefObject<number> }) => {
+  const groupRef = useRef<THREE.Group>(null);
+  const leftCupRef = useRef<THREE.Group>(null);
+  const rightCupRef = useRef<THREE.Group>(null);
 
   useFrame((state) => {
     if (!groupRef.current) return;
@@ -43,75 +169,46 @@ const PlaceholderModel = ({ scrollProgress }: { scrollProgress: React.MutableRef
     const progress = scrollProgress.current;
     const time = state.clock.elapsedTime;
 
-    // Base rotation
-    groupRef.current.rotation.y = time * 0.1 + progress * Math.PI * 2;
-    groupRef.current.rotation.x = Math.sin(time * 0.2) * 0.1;
+    // Base rotation - smooth continuous + scroll-driven
+    groupRef.current.rotation.y = time * 0.15 + progress * Math.PI * 2;
+    groupRef.current.rotation.x = Math.sin(time * 0.1) * 0.1 + progress * 0.3;
 
-    // Scale based on scroll progress (zoom in at start, out in middle, in at end)
+    // Scale based on scroll (breathe effect)
     const scaleProgress = Math.sin(progress * Math.PI);
-    const scale = 1 + scaleProgress * 0.3;
+    const scale = 1.8 + scaleProgress * 0.4;
     groupRef.current.scale.setScalar(scale);
 
-    // Explosion effect for parts
-    partsRef.current.forEach((mesh, index) => {
-      if (!mesh) return;
-      
-      const original = originalPositions[index];
-      const explosionFactor = Math.sin(progress * Math.PI) * 1.5;
-      
-      // Parts explode outward based on their original position
-      const direction = new THREE.Vector3(...original).normalize();
-      mesh.position.set(
-        original[0] + direction.x * explosionFactor,
-        original[1] + direction.y * explosionFactor,
-        original[2] + direction.z * explosionFactor
-      );
-
-      // Individual rotation for each part
-      mesh.rotation.x = time * (0.5 + index * 0.1);
-      mesh.rotation.z = time * (0.3 + index * 0.05);
-    });
+    // Explosion effect - ear cups move apart
+    const explosionFactor = Math.sin(progress * Math.PI) * 0.8;
+    
+    if (leftCupRef.current) {
+      leftCupRef.current.position.x = -1 - explosionFactor * 0.5;
+      leftCupRef.current.rotation.y = explosionFactor * 0.3;
+    }
+    
+    if (rightCupRef.current) {
+      rightCupRef.current.position.x = 1 + explosionFactor * 0.5;
+      rightCupRef.current.rotation.y = -explosionFactor * 0.3;
+    }
   });
 
   return (
-    <group ref={groupRef}>
-      {parts.map((part, index) => (
-        <mesh
-          key={index}
-          ref={(el) => {
-            if (el) partsRef.current[index] = el;
-          }}
-          geometry={part.geo}
-          position={part.position}
-        >
-          {index === 0 ? (
-            <MeshTransmissionMaterial
-              backside
-              samples={16}
-              thickness={0.5}
-              chromaticAberration={0.25}
-              anisotropy={0.4}
-              distortion={0.5}
-              distortionScale={0.5}
-              temporalDistortion={0.1}
-              iridescence={1}
-              iridescenceIOR={1}
-              iridescenceThicknessRange={[0, 1400]}
-              color="#ff6b00"
-              transmission={0.9}
-              roughness={0.1}
-            />
-          ) : (
-            <meshStandardMaterial
-              color={index % 2 === 0 ? "#ff6b00" : "#00ff88"}
-              metalness={0.9}
-              roughness={0.1}
-              emissive={index % 2 === 0 ? "#ff3300" : "#00cc66"}
-              emissiveIntensity={0.5}
-            />
-          )}
-        </mesh>
-      ))}
+    <group ref={groupRef} scale={1.8}>
+      {/* Headband */}
+      <Headband />
+      
+      {/* Slider arms */}
+      <SliderArm side="left" />
+      <SliderArm side="right" />
+      
+      {/* Ear cups with refs for animation */}
+      <group ref={leftCupRef} position={[-1, -0.15, 0]}>
+        <EarCup position={[0, 0, 0]} rotation={[0, 0, Math.PI / 2]} />
+      </group>
+      
+      <group ref={rightCupRef} position={[1, -0.15, 0]}>
+        <EarCup position={[0, 0, 0]} rotation={[0, 0, -Math.PI / 2]} />
+      </group>
     </group>
   );
 };
@@ -125,11 +222,10 @@ const DynamicLights = ({ scrollProgress }: { scrollProgress: React.MutableRefObj
     const progress = scrollProgress.current;
     const time = state.clock.elapsedTime;
 
-    // Animate light positions
     if (light1Ref.current) {
       light1Ref.current.position.x = Math.sin(time * 0.5) * 5;
       light1Ref.current.position.y = 3 + Math.cos(time * 0.3) * 2;
-      light1Ref.current.intensity = 2 + progress * 3;
+      light1Ref.current.intensity = 3 + progress * 2;
     }
 
     if (light2Ref.current) {
@@ -147,13 +243,13 @@ const DynamicLights = ({ scrollProgress }: { scrollProgress: React.MutableRefObj
 
   return (
     <>
-      <ambientLight intensity={0.1} />
+      <ambientLight intensity={0.15} />
       <spotLight
         ref={light1Ref}
         position={[5, 5, 5]}
         angle={0.5}
         penumbra={1}
-        intensity={2}
+        intensity={3}
         color="#ff6b00"
         castShadow
       />
@@ -162,11 +258,12 @@ const DynamicLights = ({ scrollProgress }: { scrollProgress: React.MutableRefObj
         position={[-5, -2, 5]}
         angle={0.6}
         penumbra={1}
-        intensity={1.5}
+        intensity={2}
         color="#00ff88"
         castShadow
       />
       <pointLight position={[0, 10, 0]} intensity={0.5} color="#ffffff" />
+      <pointLight position={[0, -5, 3]} intensity={0.3} color="#ff6b00" />
     </>
   );
 };
@@ -188,8 +285,8 @@ const Scene3D = ({ scrollProgress }: Scene3DProps) => {
         
         <DynamicLights scrollProgress={scrollProgress} />
         
-        <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
-          <PlaceholderModel scrollProgress={scrollProgress} />
+        <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.3}>
+          <HeadphonesModel scrollProgress={scrollProgress} />
         </Float>
         
         <Environment preset="night" />
